@@ -46,20 +46,21 @@ public class Client {
                 return;
             }
 
+            // envoi de l'image
             byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-
             out.writeUTF(imageFile.getName());
             out.writeLong(imageBytes.length);
             out.write(imageBytes);
             out.flush();
-
             System.out.format("L'image %s a été envoyée pour traitement.\n", imageFile.getName());
+
+            // reception de l'image
             long processedSize = in.readLong();
             byte[] processedBytes = new byte[(int) processedSize];
-
             in.readFully(processedBytes);
             File outputFile = new File(imageNameAfterSober);
 
+            // ecriture sur le disque
             Files.write(outputFile.toPath(), processedBytes);
             System.out.format("Image traitée reçue et sauvegardée : %s%n", outputFile.getAbsolutePath());
             socket.close();

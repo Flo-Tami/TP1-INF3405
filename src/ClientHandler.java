@@ -46,7 +46,6 @@ public class ClientHandler extends Thread {
             out.flush();
 
             System.out.println("Image traitée envoyée à " + user);
-
         } catch (IOException e) {
             System.out.println("Erreur client #" + clientNumber + " : " + e.getMessage());
         } finally {
