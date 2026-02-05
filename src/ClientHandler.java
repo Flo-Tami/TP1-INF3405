@@ -1,66 +1,58 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ClientHandler extends Thread {
-    private Socket socket;
-    private int clientNumber;
-    private static final Map<String, String> users = new HashMap<>();
-    static final int MIN_PORT = 5000;
-    static final int MAX_PORT = 5050;
-    static final String INPUT_ERROR = "Entrée invalide. Réessayez!";
+
+    private final Socket socket;
+    private final int clientNumber;
 
     public ClientHandler(Socket socket, int clientNumber) {
         this.socket = socket;
         this.clientNumber = clientNumber;
-        System.out.println("New connection with client#" + clientNumber + " at" + socket);
+        System.out.println("Client #" + clientNumber + " connecté");
     }
 
+    @Override
     public void run() {
         try {
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
-            String userName = in.readUTF();
+            String user = in.readUTF();
             String password = in.readUTF();
 
-            if (users.containsKey(userName)) {
-                if  (!users.get(userName).equals(password)) {
-                    out.writeUTF("Mauvais mot de passe");
-                }
-            } else {
-                users.put(userName, password);
+            if (!AuthService.authenticate(user, password)) {
+                out.writeUTF("Mauvais mot de passe");
+                return;
             }
 
-            out.writeUTF("Hello from server - you are client#" + clientNumber);
+            // Réception image
+            String fileName = in.readUTF();
+            long size = in.readLong();
+            byte[] imageBytes = new byte[(int) size];
+            in.readFully(imageBytes);
+
+            String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd@HH:mm:ss"));
+            System.out.format("[%s - %s:%d - %s] : image %s reçue pour traitement\n",
+                    user, socket.getInetAddress().getHostAddress(), socket.getPort(), date, fileName);
+
+            // Traitement
+            byte[] processed = ImageProcessor.process(imageBytes);
+
+            // Envoi image
+            out.writeLong(processed.length);
+            out.write(processed);
+            out.flush();
+
+            System.out.println("Image traitée envoyée à " + user);
+
         } catch (IOException e) {
-            System.out.println("Error handling client# " + clientNumber + ": " + e);
+            System.out.println("Erreur client #" + clientNumber + " : " + e.getMessage());
         } finally {
             try {
                 socket.close();
-            } catch (IOException e) {
-                System.out.println("Couldn't close a socket, what's going on?");
-            }
-            System.out.println("Connection with client# " + clientNumber + " closed");
+            } catch (IOException ignored) {}
         }
-    }
-
-    public static boolean ipIsValid(String ipAddress) {
-        String[] blocs = ipAddress.split("\\.");
-
-        if (blocs.length != 4) return false;
-
-        for (String bloc : blocs) {
-            try {
-                int value = Integer.parseInt(bloc);
-                if (value < 0 || value > 255) return false;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return true;
     }
 }
