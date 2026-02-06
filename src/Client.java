@@ -14,7 +14,7 @@ public class Client {
         String userName;
         String password;
         String imageName;
-        String imageNameAfterSobel;
+        String imageNameAfterSober;
 
         try (Scanner scanner = new Scanner(System.in)) {
             String serverAddress = NetworkUtils.askValidIp(scanner);
@@ -34,15 +34,24 @@ public class Client {
             out.writeUTF(password);
             out.flush();
 
-            System.out.print("Entrez le nom de l'image à transformer (avec l'extension): ");
+            String authResponse = in.readUTF();
+
+            if(!authResponse.equals("OK")) {
+                System.out.println("Erreur dans la saisie du mot de passe");
+                socket.close();
+                return;
+            }
+
+            System.out.print("Entrez le nom de l'image à transformer: ");
             imageName = scanner.nextLine();
 
             System.out.print("Entrez un nom pour l'image obtenue: ");
-            imageNameAfterSobel = scanner.nextLine();
+            imageNameAfterSober = scanner.nextLine();
 
             File imageFile = new File(imageName);
             if (!imageFile.exists()) {
                 System.out.println("Image introuvable.");
+                socket.close();
                 return;
             }
 
@@ -58,7 +67,7 @@ public class Client {
             long processedSize = in.readLong();
             byte[] processedBytes = new byte[(int) processedSize];
             in.readFully(processedBytes);
-            File outputFile = new File(imageNameAfterSobel);
+            File outputFile = new File(imageNameAfterSober);
 
             // ecriture sur le disque
             Files.write(outputFile.toPath(), processedBytes);

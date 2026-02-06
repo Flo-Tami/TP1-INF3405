@@ -11,7 +11,6 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket, int clientNumber) {
         this.socket = socket;
         this.clientNumber = clientNumber;
-        System.out.println("Client #" + clientNumber + " connecté");
     }
 
     @Override
@@ -23,9 +22,14 @@ public class ClientHandler extends Thread {
             String password = in.readUTF();
 
             if (!AuthService.authenticate(user, password)) {
-                out.writeUTF("Mauvais mot de passe");
+                out.writeUTF("FAIL");
+                out.flush();
                 return;
             }
+
+            System.out.println("Client #" + clientNumber + " connecté");
+            out.writeUTF("OK");
+            out.flush();
 
             // Réception image
             String fileName = in.readUTF();
