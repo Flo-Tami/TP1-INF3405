@@ -14,7 +14,7 @@ public class Client {
         String userName;
         String password;
         String imageName;
-        String imageNameAfterSober;
+        String imageNameAfterSobel;
 
         try (Scanner scanner = new Scanner(System.in)) {
             String serverAddress = NetworkUtils.askValidIp(scanner);
@@ -42,11 +42,11 @@ public class Client {
                 return;
             }
 
-            System.out.print("Entrez le nom de l'image à transformer: ");
+            System.out.print("Entrez le nom de l'image à transformer (avec l'extension): ");
             imageName = scanner.nextLine();
 
             System.out.print("Entrez un nom pour l'image obtenue: ");
-            imageNameAfterSober = scanner.nextLine();
+            imageNameAfterSobel = scanner.nextLine();
 
             File imageFile = new File(imageName);
             if (!imageFile.exists()) {
@@ -67,7 +67,7 @@ public class Client {
             long processedSize = in.readLong();
             byte[] processedBytes = new byte[(int) processedSize];
             in.readFully(processedBytes);
-            File outputFile = new File(imageNameAfterSober);
+            File outputFile = new File(imageNameAfterSobel);
 
             // ecriture sur le disque
             Files.write(outputFile.toPath(), processedBytes);
