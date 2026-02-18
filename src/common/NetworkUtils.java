@@ -12,6 +12,7 @@ public class NetworkUtils {
         if (blocs.length != 4) return false;
 
         for (String bloc : blocs) {
+        	if (bloc.length() > 1 && bloc.startsWith("0")) return false;
             try {
                 int value = Integer.parseInt(bloc);
                 if (value < 0 || value > 255) return false;
