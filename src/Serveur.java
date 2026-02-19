@@ -1,5 +1,6 @@
 import common.NetworkUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -7,25 +8,36 @@ import java.util.Scanner;
 
 public class Serveur {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         int clientNumber = 0;
-        Scanner scanner = new Scanner(System.in);
 
-        String serverAddress = NetworkUtils.askValidIp(scanner);
-        int serverPort = NetworkUtils.askValidPort(scanner);
+        try (Scanner scanner = new Scanner(System.in)) {
 
-        ServerSocket listener = new ServerSocket();
-        listener.setReuseAddress(true);
-        InetAddress serverIP = InetAddress.getByName(serverAddress);
-        listener.bind(new InetSocketAddress(serverIP, serverPort));
-        System.out.format("Le serveur roule sur %s:%d%n", serverAddress, serverPort);
+            ServerSocket listener = null;
 
-        try {
+            while (listener == null) {
+                try {
+                    String serverAddress = NetworkUtils.askValidIp(scanner);
+                    int serverPort = NetworkUtils.askValidPort(scanner);
+
+                    InetAddress serverIP = InetAddress.getByName(serverAddress);
+                    listener = new ServerSocket();
+                    listener.setReuseAddress(true);
+                    listener.bind(new InetSocketAddress(serverIP, serverPort));
+
+                    System.out.format("Le serveur roule sur %s:%d%n", serverAddress, serverPort);
+                } catch (IOException e) {
+                    System.out.println("Impossible de démarrer le serveur sur cette adresse/port.");
+                    listener = null;
+                }
+            }
+
             while (true) {
                 new ClientHandler(listener.accept(), clientNumber++).start();
             }
-        } finally {
-            listener.close();
+
+        } catch (IOException e) {
+            System.out.println("Erreur serveur critique : " + e.getMessage());
         }
     }
 }

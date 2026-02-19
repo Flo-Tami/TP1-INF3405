@@ -18,18 +18,24 @@ public class ClientHandler extends Thread {
         try {
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            String user = in.readUTF();
-            String password = in.readUTF();
+            boolean authenticated = false;
+            String user = null;
+            String password = null;
 
-            if (!AuthService.authenticate(user, password)) {
-                out.writeUTF("FAIL");
-                out.flush();
-                return;
+            while (!authenticated) {
+                user = in.readUTF();
+                password = in.readUTF();
+
+                if (AuthService.authenticate(user, password)) {
+                    authenticated = true;
+                    out.writeUTF("OK");
+                    out.flush();
+                    System.out.println("Client #" + clientNumber + " connecté");
+                } else {
+                    out.writeUTF("FAIL");
+                    out.flush();
+                }
             }
-
-            System.out.println("Client #" + clientNumber + " connecté");
-            out.writeUTF("OK");
-            out.flush();
 
             // Réception image
             String fileName = in.readUTF();
