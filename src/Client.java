@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Scanner;
 
+import static common.Constants.AUTHENTIFICATION_SUCCED;
+
 public class Client {
 
     public static void main(String[] args) {
@@ -47,7 +49,7 @@ public class Client {
                 out.flush();
 
                 String response = in.readUTF();
-                isAuthenticated = response.equals("OK");
+                isAuthenticated = response.equals(AUTHENTIFICATION_SUCCED);
 
                 if (!isAuthenticated) {
                     System.out.println("Erreur dans la saisie du mot de passe. Réessayez.");

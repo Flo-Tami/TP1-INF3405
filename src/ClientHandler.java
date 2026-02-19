@@ -3,6 +3,9 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static common.Constants.AUTHENTIFICATION_FAILED;
+import static common.Constants.AUTHENTIFICATION_SUCCED;
+
 public class ClientHandler extends Thread {
 
     private final Socket socket;
@@ -28,11 +31,11 @@ public class ClientHandler extends Thread {
 
                 if (AuthService.authenticate(user, password)) {
                     authenticated = true;
-                    out.writeUTF("OK");
+                    out.writeUTF(AUTHENTIFICATION_SUCCED);
                     out.flush();
                     System.out.println("Client #" + clientNumber + " connecté");
                 } else {
-                    out.writeUTF("FAIL");
+                    out.writeUTF(AUTHENTIFICATION_FAILED);
                     out.flush();
                 }
             }
