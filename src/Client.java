@@ -62,6 +62,15 @@ public class Client {
 
         } catch (IOException e) {
             System.out.println("Erreur de communication avec le serveur : " + e.getMessage());
+        } finally {
+            if (!socket.isClosed()) {
+                try {
+                    socket.close();
+                    System.out.println("Connexion fermée.");
+                } catch (IOException e) {
+                    System.out.println("Erreur lors de la fermeture du socket : " + e.getMessage());
+                }
+            }
         }
     }
 

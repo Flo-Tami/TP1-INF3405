@@ -64,7 +64,9 @@ public class ClientHandler extends Thread {
         } finally {
             try {
                 socket.close();
-            } catch (IOException ignored) {}
+            } catch (IOException message) {
+                System.out.println("Erreur lors de la fermeture du socket : " + message.getMessage());
+            }
         }
     }
 }
